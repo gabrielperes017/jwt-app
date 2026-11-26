@@ -1,36 +1,97 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# **Sistema Web de Biblioteca**
 
-## Getting Started
+Interface web desenvolvida em Next.js para gerenciamento de uma biblioteca, com autenticação, controle de acesso por perfil e integração com uma API REST.
 
-First, run the development server:
+## **Pré-requisitos**
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+Antes de executar o projeto, certifique-se de ter:
+
+- Node.js 24 ou superior
+- API da Biblioteca configurada e em execução
+- SQLite para armazenamento local de autenticação
+
+## **Configuração do ambiente**
+
+Crie um arquivo `.env` na raiz do projeto e configure as variáveis necessárias:
+
+```
+API_URL=http://localhost:3000/v1
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=senha_segura_com_16_caracteres
+AUTH_DATABASE_PATH=data/auth.sqlite
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+A variável `AUTH_DATABASE_PATH` é opcional e define o local de armazenamento dos dados de autenticação.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Na primeira inicialização, o sistema cria automaticamente o usuário administrador com base nas credenciais definidas no arquivo de ambiente.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## **Instalação**
 
-## Learn More
+Instale as dependências do projeto:
 
-To learn more about Next.js, take a look at the following resources:
+```
+npm install
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## **Execução em ambiente de desenvolvimento**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Inicie o servidor Next.js:
 
-## Deploy on Vercel
+```
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+A aplicação estará disponível em:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[http://localhost:3001](http://localhost:3001?utm_source=chatgpt.com)
+
+## **Níveis de acesso**
+
+O sistema possui dois perfis de usuário, cada um com permissões específicas.
+
+| Perfil            | Permissões                                                           |
+| ----------------- | -------------------------------------------------------------------- |
+| **Administrador** | Gerenciamento de usuários, categorias, autores, livros e relatórios. |
+| **Atendente**     | Cadastro e gerenciamento de leitores, empréstimos e devoluções.      |
+
+## **Recursos disponíveis**
+
+- Autenticação de usuários e gerenciamento de sessões.
+- Logout com revogação de refresh token.
+- Gerenciamento de categorias e autores.
+- Cadastro, pesquisa e filtragem de livros.
+- Cadastro e consulta de leitores.
+- Controle de empréstimos, consultas e devoluções.
+- Dashboard administrativo com indicadores e relatórios da biblioteca.
+
+## **Segurança e encerramento de sessão**
+
+O encerramento da sessão é realizado por meio do endpoint:
+
+`POST /v1/auth/logout`
+
+A requisição envia o refresh token, que é invalidado no servidor, impedindo sua reutilização para gerar novos tokens de acesso.
+
+### **Revogação de access tokens**
+
+A tabela `logout_list` permite registrar tokens de acesso revogados antes de seu vencimento. Quando esse mecanismo está habilitado, cada requisição pode verificar se o token informado consta na lista de revogações.
+
+Caso não seja necessário invalidar imediatamente o access token, a tabela pode ser dispensada. Nesse cenário, após o logout, o refresh token deixa de ser válido, mas o access token atual permanece utilizável até expirar.
+
+## **Armazenamento local**
+
+Os usuários cadastrados e suas permissões são armazenados no banco SQLite, por padrão em:
+
+`data/auth.sqlite`
+
+Em ambientes de produção, recomenda-se configurar `AUTH_DATABASE_PATH` para um diretório com armazenamento persistente, garantindo que os dados sejam mantidos mesmo após reinicializações ou atualizações da aplicação.
+
+## **Scripts disponíveis**
+
+| Comando         | Descrição                                        |
+| --------------- | ------------------------------------------------ |
+| `npm run dev`   | Inicia o ambiente de desenvolvimento.            |
+| `npm run build` | Compila a aplicação para produção.               |
+| `npm run start` | Executa a versão compilada.                      |
+| `npm run lint`  | Analisa o código e verifica possíveis problemas. |
+
